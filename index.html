@@ -317,9 +317,9 @@
         const main_video = new PlayerYoutube();
         
         function onYouTubeIframeAPIReady() {
-            main_video.init();
+            main_video.init(onready);
 
-            setTimeout(onready,1000)
+            //setTimeout(onready,1000)
             function onready() {
                 focusOnLi();
             }
