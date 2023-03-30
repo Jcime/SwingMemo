@@ -3,8 +3,13 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Swing Memo</title>
     <style>
+        body{
+            font-size: 100%;
+        }
+
         video {
             width: 100%;
         }
@@ -14,7 +19,7 @@
             position: absolute;
             top: 144px;
             aspect-ratio: 16 / 9;
-            left: 14px;
+            left: 3%;
         }
 
         ul {
@@ -31,40 +36,38 @@
 
         div.inMiddle {
             display: inline-block;
-            width: 58%;
+            width: 80%;
         }
 
         img.move_logo {
-            width: 20%;
+            width: 9%;
         }
 
         img.toLeft {
-            display: inline-block;
+            float: left;
         }
 
         img.toRight {
-            display: inline-block;
+            float:right;
         }
 
         .move_video {
             width: 100%;
-            aspect-ratio: 16 / 11;
+            aspect-ratio: 16 / 12;
+            clear: both;
         }
 
-        p.title {
-            font-size: larger;
+        .title {
             text-align: center;
         }
 
-        p.title span{
+        .title span{
             font-size: medium;
             font-style: italic;
             color: gray;
         }
 
-        li:visible:first {
-            background:'blue';
-        }
+
     </style>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 </head>
@@ -83,7 +86,7 @@
             <ul id="move_display">
                 <li>
                     <img class="move_logo toLeft" src="img/events/French Connection.png">
-                    <div class="inMiddle"><p class="title">Prep inside to upper arm ballad <span>12/02/2023</span></p>
+                    <div class="inMiddle"><div class="title">Prep inside to upper arm ballad <span>12/02/2023</span></div>
                     </div>
                     <img class="move_logo toRight" src="img/teachers/Thibault et Nicole.png">
                     <div class="move_video">
@@ -115,6 +118,7 @@
     </div>
     <script>
 
+        
         function isScrolledIntoView(elem)
         {
             var docViewTop = $(window).scrollTop();
@@ -135,11 +139,9 @@
                 
             //firstVisible.css('background','blue');
             if (firstVisible.eq(0) && firstVisible.eq(0).get(0) != lastVisible) {
-                lastVisible = firstVisible.eq(0).get(0);
-                
                 videoShown = false;
 
-                extract = moveList[firstVisible.eq(0).index()].extract;
+                extract = filterOrderedMoveList[firstVisible.eq(0).index()].extract;
 
                 reset();
 
@@ -157,6 +159,7 @@
                         //main_video.seekTo(extract.start);
                         main_video.play();
                         videoShown = true;
+                        $('#video_widget').show();
                     }
                     else {
                         setTimeout(reset, 100);
@@ -166,13 +169,14 @@
                // setTimeout(function() {
                 main_video.loadVideoById(
                     {
-                        videoId:moveList[firstVisible.eq(0).index()].modeVideoId,
+                        videoId:filterOrderedMoveList[firstVisible.eq(0).index()].modeVideoId,
                       startSeconds:extract.start,
                       endSeconds:extract.end}); 
                 //    }
                 //,100)
                 
                 $('#video_widget').css('top',firstVisible.eq(0).children(".move_video").position().top);
+                lastVisible = firstVisible.eq(0).get(0);
             }
         }
 
@@ -235,6 +239,8 @@
         },
         ]
 
+        var filterOrderedMoveList = moveList;
+
         // var options = $( ".selector" ).autocomplete( "option" );
 
         // $(function () {
@@ -245,18 +251,18 @@
         //     });
         // });
 
-        $("#move_search").on("keyup change",updateDisplayedMoves);
+        $("#move_search").on("change",updateDisplayedMoves);
 
         updateDisplayedMoves();
         function updateDisplayedMoves() {
             $("#move_display").html("");
-           moveList.filter(
-                    e => e.moveName.toLocaleLowerCase().indexOf($("#move_search").val().toLocaleLowerCase()) > -1)
-           .forEach(element => {
+            filterOrderedMoveList = moveList.filter(e => e.moveName.toLocaleLowerCase().indexOf($("#move_search").val().toLocaleLowerCase()) > -1);
+            filterOrderedMoveList.forEach(element => {
                 var listElement  = $(`
                 <li>
                     <img class="move_logo toLeft" src="img/events/`+element.event+`.png">
-                    <div class="inMiddle"><p class="title">`+element.moveName+`<span>`+element.period+`</span></p>
+                    <div class="inMiddle">
+                        <div class="title">`+element.moveName+` <span> `+element.period+`</span></div>
                     </div>
                     <img class="move_logo toRight" src="img/teachers/`+element.teacher+`.png">
                     <div class="move_video">
@@ -265,6 +271,15 @@
                 
                 $("#move_display").append(listElement)
            }); 
+
+           if ( filterOrderedMoveList.length > 0 ) {
+                $("#video_widget").show();
+                focusOnLi();
+           }
+           else {
+                main_video.pause();
+                $("#video_widget").hide();
+           }
         }
 
  /*        moveList.forEach(element => {
@@ -291,7 +306,14 @@
         </div>
     </div>
     <script>
+        $('#video_widget').hide();
+        try {
+            $('#video_widget').css('top',$('li').eq(0).children(".move_video").position().top);
+        }
+        catch {
 
+        }
+        
         const main_video = new PlayerYoutube();
         
         function onYouTubeIframeAPIReady() {
