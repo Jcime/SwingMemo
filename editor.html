@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Swing Memo</title>
+    <style>
+        video {
+            width: 100%;
+        }
+
+        #video_widget {
+            width: 80%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script/player.js"></script>
+    <div id="video_widget">
+        <!--         <video id="main_video" style="display: none;" controls>
+            <source src="videos/20230225_223152.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video> -->
+        <input id="videoIdInput" value="RY4Ir-wkQ_w">
+        <div id="playerYoutube"></div>
+        <div>
+            <button id="toggle_play">Pause</button>
+            <button id="play_rate_1">x1</button>
+            <button id="play_rate_0_5">x0.5</button>
+            <div id="display_time" style="display: none;"></div>
+            <div id="progressbar"></div>
+            <p>
+                <label for="amount">Time range:</label>
+                <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </p>
+
+            <div id="slider-range"></div>
+            <div id="slider-zoom"></div>
+            <div id="tags">
+                <button value="" class="toggle-tags">LR</button>
+                <button value="" class="toggle-tags">RL</button>
+                <button value="" class="toggle-tags">RR</button>
+                <button value="" class="toggle-tags">LL</button>
+                <button value="" class="toggle-tags">RRLL</button>
+                <button value="" class="toggle-tags">LLRR</button>
+            </div>
+            <div class="ui-widget">
+                <label for="events">Evenement: </label>
+                <input id="events" size="50">
+            </div>
+            <div class="ui-widget">
+                <label for="period">Période: </label>
+                <input id="period" size="50">
+            </div>
+            <div>
+                <label for="title">Titre</label><input id="title" size="50">
+            </div>
+            <div>
+                <label for="teacher">Profs</label><input id="teacher" size="50">
+            </div>
+            <button id="export">Export</button>
+            <textarea id="exportString" rows="12" cols="80"></textarea>
+
+            <!--             <select>
+                <option>Aucun</option>
+                <option>GGP Toulouse</option>
+                <option>French Connection Toulouse </option>
+                <option>Cours Encas Danse (Fun et Style)</option>
+                <option>Cours Encas Danse (Avancé)</option>
+                <option>Cours Encas Danse (Inter)</option>
+            </select>
+            <select>
+                <option>Aucun</option>
+                <option>12/2022</option>
+                <option>02/2023</option>
+            </select> -->
+        </div>
+    </div>
+    <script>
+
+        $('#videoIdInput').keypress(function (event) {
+            if (event.keyCode == 13) {
+                main_video.loadVideoById($('#videoIdInput').val());
+                console.log("Duration : " + main_video.getDuration());
+                console.log("State : " + main_video.getNativePlayer().getPlayerState());
+
+                reset();
+
+                function reset() {
+                    if (main_video.getNativePlayer().getPlayerState() == 1) {
+                        console.log("State : " + main_video.getNativePlayer().getPlayerState());
+                        extract = {
+                            start: 0,
+                            end: main_video.getDuration()
+                        }
+                        sliderInit();
+                    }
+                    else {
+                        setTimeout(reset, 100);
+                    }
+                }
+            }
+        });
+
+        $(function () {
+            var availableEvents = [
+                "GGP Toulouse",
+                "French Connection Toulouse",
+                "Cours Encas Danse (Fun et Style)",
+                "Cours Encas Danse (Avancé)",
+                "Cours Encas Danse (Inter)"
+            ];
+            $("#events").autocomplete({
+                source: availableEvents
+            });
+            var availablePeriod = [
+                "12/2022",
+                "02/2023"
+            ];
+            $("#period").autocomplete({
+                source: availablePeriod
+            });
+        });
+
+        const main_video = new PlayerYoutube();
+
+        function onYouTubeIframeAPIReady() {
+            console.log("onYouTubeIframeAPIReady");
+            main_video.init(onready);
+
+            function onready() {
+                videoShown = true;
+                main_video.play();
+
+                main_video.seekTo(extract.start);
+                main_video.setPlaybackRate(1.0);
+
+                sliderInit();
+
+            }
+        }
+
+        var videoShown = false;
+
+        var extract = {
+            start: 205.814104,
+            end: 212.681083
+        }
+
+
+        $("#toggle_play").on("click", function () {
+            videoShown = true;
+            const toggle_play_button = $("#toggle_play");
+            if (main_video.isPaused()) {
+                main_video.play();
+                toggle_play_button.html("Pause");
+            }
+            else {
+                main_video.pause();
+                toggle_play_button.html("Play")
+            }
+        })
+
+        $("#play_rate_1").on("click", function () {
+            main_video.setPlaybackRate(1.0);
+        });
+        $("#play_rate_0_75").on("click", function () {
+            main_video.setPlaybackRate(0.75);
+        });
+        $("#play_rate_0_5").on("click", function () {
+            main_video.setPlaybackRate(0.5);
+        });
+
+
+        $("#main_video").on(
+            "timeupdate",
+            function (event) {
+                //onTrackedVideoFrame(this.currentTime, this.duration);
+            });
+
+        function onTrackedVideoFrame(ofcurrentTime, duration) {
+            var currentTime = main_video.getCurrentTime();
+            $("#display_time").text(currentTime);
+
+            if (currentTime > extract.end) {
+                main_video.seekTo(extract.start);
+            }
+
+            //Calcultate percent
+            var percentage = ((currentTime - extract.start) / (extract.end - extract.start)) * 100;
+
+            $("#progressbar").progressbar({
+                value: percentage
+            });
+        }
+
+        var intervalId = setInterval(function () {
+            if (videoShown) {
+                onTrackedVideoFrame();
+            }
+        }, 10);
+
+        function sliderInit() {
+            $("#slider-range").slider({
+                range: true,
+                min: 0,
+                max: main_video.getDuration() * 1000,
+                values: [extract.start * 1000, extract.end * 1000],
+                slide: function (event, ui) {
+                    $("#amount").val("" + ui.values[0] + "ms - " + ui.values[1] + "ms");
+                    $("#slider-zoom").slider({
+                        min: $("#slider-range").slider("values", 0) - 3000,
+                        max: $("#slider-range").slider("values", 1) + 3000
+                    });
+                    $("#slider-zoom").slider('values', 0, ui.values[0]);
+                    $("#slider-zoom").slider('values', 1, ui.values[1]);
+                    extract.start = ui.values[0] / 1000.0;
+                    extract.end = ui.values[1] / 1000.0;
+                    main_video.seekTo(ui.values[0] / 1000.0, false);
+                },
+                stop: function (event, ui) {
+                    main_video.play();
+                },
+                start: function (event, ui) {
+                    main_video.pause();
+                }
+            });
+            $("#amount").val("" + $("#slider-range").slider("values", 0) +
+                " - " + $("#slider-range").slider("values", 1));
+
+            $("#slider-zoom").slider({
+                range: true,
+                min: $("#slider-range").slider("values", 0) - 3000,
+                max: $("#slider-range").slider("values", 1) + 3000,
+                values: [extract.start * 1000, extract.end * 1000],
+                slide: function (event, ui) {
+                    $("#amount").val("" + ui.values[0] + "ms - " + ui.values[1] + "ms");
+                    $("#slider-range").slider('values', 0, ui.values[0]);
+                    $("#slider-range").slider('values', 1, ui.values[1]);
+                    extract.start = ui.values[0] / 1000.0;
+                    extract.end = ui.values[1] / 1000.0;
+                    main_video.seekTo(ui.values[0] / 1000.0, false);
+                },
+                stop: function (event, ui) {
+                    main_video.play();
+                },
+                start: function (event, ui) {
+                    main_video.pause();
+                }
+            });
+        };
+
+        $("#export").on(
+            "click",
+            function (event) {
+
+                var exportedObject = {
+                    moveId: generateUUID(),
+                    moveName: $("#title").val(),
+                    moveMovie: $("#videoId").val(),
+                    event : $("#events").val(),
+                    period : $("#period").val(),
+                    teacher: $("#teacher").val(),
+                    extract: extract
+                }
+
+                $("#exportString").val(JSON.stringify(exportedObject, null, 4));
+            });
+
+        function generateUUID() { // Public Domain/MIT
+            var d = new Date().getTime();//Timestamp
+            var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16;//random number between 0 and 16
+                if (d > 0) {//Use timestamp until depleted
+                    r = (d + r) % 16 | 0;
+                    d = Math.floor(d / 16);
+                } else {//Use microseconds since page-load if supported
+                    r = (d2 + r) % 16 | 0;
+                    d2 = Math.floor(d2 / 16);
+                }
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+    </script>
+</body>
+
+</html>

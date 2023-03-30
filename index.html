@@ -1,0 +1,380 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Swing Memo</title>
+    <style>
+        video {
+            width: 100%;
+        }
+
+        #video_widget {
+            width: 100%;
+            height: 80%;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            padding-bottom: 500px;
+        }
+
+        li {
+            border: gray 1px solid;
+            list-style: none;
+            padding: 10px;
+        }
+
+        div.inMiddle {
+            display: inline-block;
+            width: 58%;
+        }
+
+        img.move_logo {
+            width: 20%;
+        }
+
+        img.toLeft {
+            display: inline-block;
+        }
+
+        img.toRight {
+            display: inline-block;
+        }
+
+        .move_video {
+            width: 100%;
+            height: 355px;
+        }
+
+        p.title {
+            font-size: larger;
+            text-align: center;
+        }
+
+        p.title span{
+            font-size: medium;
+            font-style: italic;
+            color: gray;
+        }
+
+        li:visible:first {
+            background:'blue';
+        }
+    </style>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script/player.js"></script>
+    <div id="move_list">
+        <div class="ui-widget">
+            <label for="tags">Find: </label>
+            <input id="move_search">
+        </div>
+        <div>
+            <ul id="move_display">
+                <li>
+                    <img class="move_logo toLeft" src="img/events/French Connection.png">
+                    <div class="inMiddle"><p class="title">Prep inside to upper arm ballad <span>12/02/2023</span></p>
+                    </div>
+                    <img class="move_logo toRight" src="img/teachers/Thibault et Nicole.png">
+                    <div class="move_video">
+                    </div>
+                </li>
+                <li>
+                    <img class="move_logo toLeft" src="img/events/French Connection.png">
+                    <div class="inMiddle"><p class="title">Prep inside to upper arm ballad <span>12/02/2023</span></p>
+                    </div>
+                    <img class="move_logo toRight" src="img/teachers/Thibault et Nicole.png">
+                    <div class="move_video"></div>
+                </li>
+                <li>
+                    <img class="move_logo toLeft" src="img/events/French Connection.png">
+                    <div class="inMiddle"><p class="title">Prep inside to upper arm ballad <span>12/02/2023</span></p>
+                    </div>
+                    <img class="move_logo toRight" src="img/teachers/Thibault et Nicole.png">
+                    <div class="move_video"></div>
+                </li>
+                <li>
+                    <img class="move_logo toLeft" src="img/events/French Connection.png">
+                    <div class="inMiddle"><p class="title">Prep inside to upper arm ballad <span>12/02/2023</span></p>
+                    </div>
+                    <img class="move_logo toRight" src="img/teachers/Thibault et Nicole.png">
+                    <div class="move_video"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script>
+
+        function isScrolledIntoView(elem)
+        {
+            var docViewTop = $(window).scrollTop();
+            var docViewBottom = docViewTop + $(window).height();
+
+            var elemTop = $(elem).offset().top;
+            var elemBottom = elemTop + $(elem).height();
+
+            return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+        }
+        
+        var lastVisible;
+        function focusOnLi() {
+            $('li').css('background','none');
+            var firstVisible = $('li').filter(function(index,element) {
+                    return isScrolledIntoView(element);
+                }).eq(0);
+                
+            //firstVisible.css('background','blue');
+            if (firstVisible.eq(0) && firstVisible.eq(0).get(0) != lastVisible) {
+                lastVisible = firstVisible.eq(0).get(0);
+                firstVisible.eq(0).children(".move_video").append($("#video_widget"));
+                videoShown = false;
+
+                extract = moveList[firstVisible.eq(0).index()].extract;
+                
+                main_video.loadVideoById(moveList[firstVisible.eq(0).index()]);
+                
+
+                console.log("Duration : " + main_video.getDuration());
+                console.log("State : " + main_video.getNativePlayer().getPlayerState());
+
+                reset();
+
+                function reset() {
+                    if (main_video.getNativePlayer().getPlayerState() == 1) {
+                        console.log("State : " + main_video.getNativePlayer().getPlayerState());
+                        main_video.seekTo(extract.start);
+                        main_video.play();
+                        videoShown = true;
+                    }
+                    else {
+                        setTimeout(reset, 100);
+                    }
+                }
+            }
+        }
+
+        
+
+        $(window).scroll(function() {
+            clearTimeout($.data(this, 'scrollTimer'));
+            $.data(this, 'scrollTimer', setTimeout(function() {
+                focusOnLi();
+                console.log("Haven't scrolled in 250ms!");
+            }, 250));
+        });
+
+      
+        var moveList = [
+        {
+            "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
+            "moveName": "Prep inside to upper arm ballad 1",
+            "event": "French Connection",
+            "period": "02/2023",
+            "teacher": "Thibault et Nicole",
+            "extract": {
+                "start": 205.814104,
+                "end": 212.681083
+            }
+        }, {
+            "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
+            "moveName": "Prep inside to upper arm ballad 2",
+            "event": "French Connection",
+            "period": "02/2023",
+            "teacher": "Thibault et Nicole",
+            "extract": {
+                "start": 215.814104,
+                "end": 222.681083
+            }
+        }, {
+            "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
+            "moveName": "Prep inside to upper arm ballad 3",
+            "event": "French Connection",
+            "period": "02/2023",
+            "teacher": "Thibault et Nicole",
+            "extract": {
+                "start": 195.814104,
+                "end": 202.681083
+            }
+        }, {
+            "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
+            "moveName": "Prep inside to upper arm ballad 4",
+            "event": "French Connection",
+            "period": "02/2023",
+            "teacher": "Thibault et Nicole",
+            "extract": {
+                "start": 205.814104,
+                "end": 212.681083
+            }
+        },
+        ]
+
+        // var options = $( ".selector" ).autocomplete( "option" );
+
+        // $(function () {
+        //     var availableTags = moveList.map(e => e.moveName);
+        //     $("#move_search").autocomplete({
+        //         source: availableTags,
+        //         change: updateDisplayedMoves
+        //     });
+        // });
+
+        $("#move_search").on("keyup change",updateDisplayedMoves);
+
+        updateDisplayedMoves();
+        function updateDisplayedMoves() {
+            $("#move_display").html("");
+           moveList.filter(
+                    e => e.moveName.toLocaleLowerCase().indexOf($("#move_search").val().toLocaleLowerCase()) > -1)
+           .forEach(element => {
+                var listElement  = $(`
+                <li>
+                    <img class="move_logo toLeft" src="img/events/`+element.event+`.png">
+                    <div class="inMiddle"><p class="title">`+element.moveName+`<span>`+element.period+`</span></p>
+                    </div>
+                    <img class="move_logo toRight" src="img/teachers/`+element.teacher+`.png">
+                    <div class="move_video">
+                    </div>
+                </li>`);
+                
+                $("#move_display").append(listElement)
+           }); 
+        }
+
+ /*        moveList.forEach(element => {
+                var listElement  = $("<li>"+element.moveName+"</li>");
+                listElement.on("click",function() {
+                   openMovePopup(element);
+                })
+                $("#move_display").append(listElement)
+           }); */
+
+    </script>
+    <div id="video_widget">
+        <video id="main_video" style="display: none;" controls>
+            <source src="videos/20230225_223152.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div id="playerYoutube"></div>
+        <div>
+            <div id="progressbar"></div>
+            <button id="toggle_play">Pause</button>
+            <button id="play_rate_1">x1</button>
+            <button id="play_rate_0_5">x0.5</button>
+            <div id="display_time" style="display: none;"></div>
+        </div>
+    </div>
+    <script>
+
+        const main_video = new PlayerYoutube();
+        
+        function onYouTubeIframeAPIReady() {
+            main_video.init();
+
+            setTimeout(onready,1000)
+            function onready() {
+                focusOnLi();
+            }
+        }
+
+        $( function initMovieDialog() {
+            var wWidth = $(window).width();
+            var dWidth = wWidth * 0.8;
+            var wHeight = $(window).height();
+            var dHeight = wHeight * 0.8;
+            $( "#video_widget" ).dialog({
+				autoOpen: false,
+				modal: true,
+				overlay: { opacity: 0.1, background: "black" },
+				width: dWidth,
+				height: dHeight,
+				draggable: false,
+                resizable: false
+			});
+
+            $("#video_widget").on('dialogclose', function(event) {
+                main_video.pause();
+                videoShown = false;
+            });
+
+            $( "#video_widget" ).dialog('close');
+        } );
+
+        var videoShown = false;
+
+        function openMovePopup(move) {
+            videoShown = true;
+            $( "#video_widget" ).dialog('open');
+            $( "#video_widget" ).dialog({ title: move.moveName});
+            main_video.play();
+            main_video.seekTo(move.extract.start);
+            main_video.setPlaybackRate(1.0);
+            extract = move.extract;
+        }
+
+        var extract = {
+            start :  205.814104,
+            end : 212.681083
+        }
+
+
+        $("#toggle_play").on("click", function () {
+            
+            const toggle_play_button = $("#toggle_play");
+            if (main_video.isPaused()) {
+                main_video.play();
+                toggle_play_button.html("Pause");
+            }
+            else {
+                main_video.pause();
+                toggle_play_button.html("Play")
+            }
+        })
+
+        $("#play_rate_1").on("click", function () {
+            main_video.setPlaybackRate(1.0); 
+        }); 
+        $("#play_rate_0_5").on("click", function () {
+            main_video.setPlaybackRate(0.5);
+        });
+
+
+        $("#main_video").on(
+            "timeupdate",
+            function (event) {
+                //onTrackedVideoFrame(this.currentTime, this.duration);
+            });
+        
+        function onTrackedVideoFrame(ofcurrentTime, duration){
+            console.log("onTrackedVideoFrame");
+            var currentTime = main_video.getCurrentTime();
+            $("#display_time").text(currentTime);
+
+            if (currentTime > extract.end ) {
+                main_video.seekTo(extract.start);
+            }
+
+            //Calcultate percent
+            var percentage = ((currentTime - extract.start) / (extract.end - extract.start) ) *100;
+
+            $( "#progressbar" ).progressbar({
+                value: percentage
+            });
+        }
+
+        var intervalId = setInterval(function() {
+            if ( videoShown ) {
+                onTrackedVideoFrame();
+            }
+        }, 10);
+
+    </script>
+</body>
+
+</html>
