@@ -10,8 +10,11 @@
         }
 
         #video_widget {
-            width: 100%;
-            height: 80%;
+            width: 94%;
+            position: absolute;
+            top: 144px;
+            aspect-ratio: 16 / 9;
+            left: 14px;
         }
 
         ul {
@@ -133,23 +136,25 @@
             //firstVisible.css('background','blue');
             if (firstVisible.eq(0) && firstVisible.eq(0).get(0) != lastVisible) {
                 lastVisible = firstVisible.eq(0).get(0);
-                firstVisible.eq(0).children(".move_video").append($("#video_widget"));
+                
                 videoShown = false;
 
                 extract = moveList[firstVisible.eq(0).index()].extract;
 
-                main_video.loadVideoById(moveList[firstVisible.eq(0).index()]);
-                
-
-                console.log("Duration : " + main_video.getDuration());
-                console.log("State : " + main_video.getNativePlayer().getPlayerState());
-
                 reset();
 
                 function reset() {
-                    if (main_video.getNativePlayer().getPlayerState() == 1) {
+
+                    var isReady = false;
+                    try {
+                        isReady = main_video.getNativePlayer().getPlayerState() == 1;
+                    } catch (error) {
+                        console.log(error);
+                    }
+
+                    if (isReady) {
                         console.log("State : " + main_video.getNativePlayer().getPlayerState());
-                        main_video.seekTo(extract.start);
+                        //main_video.seekTo(extract.start);
                         main_video.play();
                         videoShown = true;
                     }
@@ -157,6 +162,17 @@
                         setTimeout(reset, 100);
                     }
                 }
+
+               // setTimeout(function() {
+                main_video.loadVideoById(
+                    {
+                        videoId:moveList[firstVisible.eq(0).index()].modeVideoId,
+                      startSeconds:extract.start,
+                      endSeconds:extract.end}); 
+                //    }
+                //,100)
+                
+                $('#video_widget').css('top',firstVisible.eq(0).children(".move_video").position().top);
             }
         }
 
@@ -175,6 +191,7 @@
         {
             "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
             "moveName": "Prep inside to upper arm ballad 1",
+            "modeVideoId" :"RY4Ir-wkQ_w",
             "event": "French Connection",
             "period": "02/2023",
             "teacher": "Thibault et Nicole",
@@ -185,6 +202,7 @@
         }, {
             "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
             "moveName": "Prep inside to upper arm ballad 2",
+            "modeVideoId" :"RY4Ir-wkQ_w",
             "event": "French Connection",
             "period": "02/2023",
             "teacher": "Thibault et Nicole",
@@ -195,6 +213,7 @@
         }, {
             "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
             "moveName": "Prep inside to upper arm ballad 3",
+            "modeVideoId" :"RY4Ir-wkQ_w",
             "event": "French Connection",
             "period": "02/2023",
             "teacher": "Thibault et Nicole",
@@ -205,6 +224,7 @@
         }, {
             "moveId": "641ce96a-5bbb-4ae1-81b7-a94b0cfc3783",
             "moveName": "Prep inside to upper arm ballad 4",
+            "modeVideoId" :"RY4Ir-wkQ_w",
             "event": "French Connection",
             "period": "02/2023",
             "teacher": "Thibault et Nicole",
@@ -283,46 +303,12 @@
             }
         }
 
-        $( function initMovieDialog() {
-            var wWidth = $(window).width();
-            var dWidth = wWidth * 0.8;
-            var wHeight = $(window).height();
-            var dHeight = wHeight * 0.8;
-            $( "#video_widget" ).dialog({
-				autoOpen: false,
-				modal: true,
-				overlay: { opacity: 0.1, background: "black" },
-				width: dWidth,
-				height: dHeight,
-				draggable: false,
-                resizable: false
-			});
-
-            $("#video_widget").on('dialogclose', function(event) {
-                main_video.pause();
-                videoShown = false;
-            });
-
-            $( "#video_widget" ).dialog('close');
-        } );
-
         var videoShown = false;
-
-        function openMovePopup(move) {
-            videoShown = true;
-            $( "#video_widget" ).dialog('open');
-            $( "#video_widget" ).dialog({ title: move.moveName});
-            main_video.play();
-            main_video.seekTo(move.extract.start);
-            main_video.setPlaybackRate(1.0);
-            extract = move.extract;
-        }
 
         var extract = {
             start :  205.814104,
             end : 212.681083
         }
-
 
         $("#toggle_play").on("click", function () {
             
@@ -352,7 +338,7 @@
             });
         
         function onTrackedVideoFrame(ofcurrentTime, duration){
-            console.log("onTrackedVideoFrame");
+            //console.log("onTrackedVideoFrame");
             var currentTime = main_video.getCurrentTime();
             $("#display_time").text(currentTime);
 
