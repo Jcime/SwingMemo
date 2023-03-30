@@ -38,7 +38,7 @@ class PlayerYoutube  {
             'onReady': onReady,
             'onStateChange': this.onPlayerStateChange
         },
-        playerVars : {autoplay:1,loop:1,controls:0,iv_load_policy:3,modestbranding:1,rel:0,showinfo:0}
+        playerVars : {autoplay:1,loop:1,controls:0,iv_load_policy:3,modestbranding:1,rel:0,showinfo:0, 'origin': 'https://jcime.github.io/'}
         });
         
     }
